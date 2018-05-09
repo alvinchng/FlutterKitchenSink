@@ -3,7 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'detail_view.dart';
-
+import 'package:kitchensink/utilities/data_manager.dart' as DM;
+import 'package:kitchensink/objs/obj_parser.dart';
 
 class RootView extends StatefulWidget {
   @override
@@ -51,13 +52,25 @@ class RootViewState extends State<RootView> {
       showDialog(context: context, builder: (_) => alert);
     }
 
-    _sayHello();
+    //_sayHello();
+    
+    _naviPush(BuildContext context) async {
+      final result = await Navigator.of(context).push(new MaterialPageRoute(
+        builder: (context) => new DetailView()
+      ));
 
-    // Navigator.of(context).push(
-    //   new MaterialPageRoute(
-    //     builder: (context) => new DetailView()
-    //   )
-    //   );
+      // Callback when Pop
+      if (result.runtimeType == ObjParser) {
+        final parser = result as ObjParser;
+        print(parser.title);
+      }
+      
+    }
+
+    _naviPush(context);
+
   }
+
+
 
 } 
