@@ -24,6 +24,13 @@ class RootViewState extends State<RootView> {
         title: new Text("Home"),
         backgroundColor: Colors.pink,
       ),
+      floatingActionButton: new SafeArea(
+        child: new FloatingActionButton(
+          child: new Icon(Icons.add),
+          onPressed: () {
+          print("haha");
+        },),
+      ),
       body: new Center(
         child: new FlatButton(
           child: new Text("Details"),
