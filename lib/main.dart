@@ -8,7 +8,11 @@ class Application extends StatelessWidget {
   Widget build(BuildContext context) {
     // TODO: implement build
     return new MaterialApp(
-      home: new RootView()
+      debugShowCheckedModeBanner: false,
+      home: new RootView(),
+      theme: Theme.of(context).copyWith(
+        primaryColor: Colors.pink,
+      ),
     );
   }
 
