@@ -6,6 +6,7 @@ import 'detail_view.dart';
 import 'login_view.dart';
 import 'package:kitchensink/utilities/data_manager.dart' as DM;
 import 'package:kitchensink/objs/obj_parser.dart';
+import 'package:kitchensink/utilities/login_manager.dart';
 
 class RootView extends StatefulWidget {
   @override
@@ -35,8 +36,14 @@ class RootViewState extends State<RootView> {
       body: new Center(
         child: new FlatButton(
           child: new Text("Details"),
-          onPressed: () {
+          onPressed: () async {
             
+            if (await LoginManager.isSignIn()) {
+              print("LOGINNING.....");
+            }
+            else {
+              print('NOT LOGIN..');
+            }
           },
         )
       )
