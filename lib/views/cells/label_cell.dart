@@ -6,7 +6,7 @@ import 'package:kitchensink/objs/obj_cell.dart';
 class LabelCell extends StatefulWidget {
 
   final ObjCell obj;
-  final Function onPress;
+  final VoidCallback onPress;
 
   const LabelCell({
     Key key,
@@ -51,29 +51,32 @@ class LabelCellState extends State<LabelCell> {
           }
         },
         child: new Container(
-          constraints: new BoxConstraints.expand(
-            height: 44.0
-          ),
-          //padding: const EdgeInsets.only(top:8.0, bottom: 8.0, left: 12.0, right: 12.0),
-          child: new Stack(
-              children: <Widget>[
-                new Positioned(
-                  left: 0.0,
-                  top: 0.0,
-                  child: new Text(title.toString(),
-                      style: new TextStyle(
-                        fontSize: 18.0,
-                      )
-                  ),
-                ),
-                new Positioned(
-                  right: 0.0,
-                  top: 0.0,
-                  child: new Icon(Icons.keyboard_arrow_right),
+          padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
+          child: Row(
+            children: <Widget>[
+              Expanded(
+                child: new Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    new Container(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: new Text(title.toString(), 
+                                      style: TextStyle(
+                                        fontSize: 18.0,
+                                        ),
+                                    ),
+                    ),
+                    new Text(desc.toString(), style: TextStyle(
+                      color: Colors.grey[500]
+                    ),)
+                  ],
                 )
-              ]
+              ),
+              Icon(Icons.keyboard_arrow_right),
+            ],
+          ),
         ),
-        ),
+        
       );
       
   }

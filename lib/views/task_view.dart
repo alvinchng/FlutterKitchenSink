@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'base_view.dart';
 import 'package:kitchensink/objs/obj_cell.dart';
@@ -16,6 +17,30 @@ class TaskViewState extends State<TaskView> {
   final GlobalKey<FormState> _formKey = new GlobalKey<FormState>();
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   List<ObjCell> _dataSources;
+
+  DateTime _date = new DateTime.now();
+
+  Future<Null> _showDateDialog(BuildContext context) async {
+    
+    final DateTime picked = await showDatePicker(
+      context: context,
+      initialDate: _date,
+      firstDate: new DateTime(2016),
+      lastDate: new DateTime(2020)
+
+    );
+
+    if (picked != null && picked != _date) {
+      print('date selected: $picked');
+
+      ObjCell cell = ObjCell.findByIdentifier(_dataSources, 'date');
+      setState(() {
+              cell.desc = picked.toString();
+            });
+    }
+
+  }
+
 
   addDataSources() {
 
@@ -38,6 +63,7 @@ class TaskViewState extends State<TaskView> {
     cell.type = ObjCellType.Label;
     cell.identifier = 'date';
     cell.title = "Date";
+    cell.desc = new DateTime.now().toString();
     _dataSources.add(cell);
 
 
@@ -61,7 +87,7 @@ class TaskViewState extends State<TaskView> {
     // TODO: implement build
     return new BaseView(
       scaffoldKey: _scaffoldKey,
-      title: 'Login',
+      title: 'New Task',
       child: new SafeArea(
                 top: false,
                 bottom: false,
@@ -75,8 +101,9 @@ class TaskViewState extends State<TaskView> {
                           
                           return new LabelCell(
                             obj: item,
-                            onPress: (){
+                            onPress: () async {
                              print(item.title); 
+                             _showDateDialog(context);
                             },
                           );
 
