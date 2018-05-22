@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import 'base_view.dart';
 import 'package:kitchensink/objs/obj_cell.dart';
 import 'package:kitchensink/views/cells/textfield_cell.dart';
 import 'package:kitchensink/views/cells/button_cell.dart';
-import 'dart:async';
 import 'package:kitchensink/utilities/login_manager.dart';
+import 'package:kitchensink/utilities/helper.dart';
 
 class LoginView extends StatefulWidget {
   @override
@@ -18,6 +19,8 @@ class LoginView extends StatefulWidget {
 class LoginState extends State<LoginView> {
   
   final GlobalKey<FormState> _formKey = new GlobalKey<FormState>();
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+
   List<ObjCell> _dataSources;
 
 
@@ -47,32 +50,7 @@ class LoginState extends State<LoginView> {
 
   }
 
-  void _onLoading() {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => new Dialog(
-        child: new Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: new Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              new CircularProgressIndicator(),
-              new Container(
-                padding: const EdgeInsets.fromLTRB(12.0, 0.0, 0.0, 0.0),
-                child: new Text("Loading..."),
-              )
-              
-            ],
-        )
-        ),
-      ),
-    );
-    // new Future.delayed(new Duration(seconds: 3), () {
-    //   Navigator.pop(context); //pop dialog
-    //   //_login();
-    // });
-}
+  
   
   @override
   void initState() {
@@ -99,6 +77,7 @@ class LoginState extends State<LoginView> {
     
 
     return new BaseView(
+      scaffoldKey: _scaffoldKey,
       title: 'Login',
       child: new SafeArea(
                 top: false,
@@ -123,7 +102,7 @@ class LoginState extends State<LoginView> {
                               
                               if (_formKey.currentState.validate()) {
                                 
-                                //_onLoading();
+                                Helper.progressHUD(context);
 
                                 // _dataSources.forEach((cell){
                                 //   print(cell.desc);
@@ -138,11 +117,16 @@ class LoginState extends State<LoginView> {
                                   });
 
                                   if (manager != null) {
-                                    print(manager.firebaseUser.uid);
-                                    
+                                    //print(manager.firebaseUser.providerData);
+                                    Navigator.pop(context);
+                                    Navigator.pushNamedAndRemoveUntil(context, '/home', (Route<dynamic> r) => false);
+ 
                                   }
                                   else {
-                                    print('FAILURE LOGIN!!!!');
+                                    Navigator.pop(context);
+                                    _scaffoldKey.currentState.showSnackBar(new SnackBar(
+                                      content: new Text('Authentication Failed.'),
+                                    ));
                                   }
 
                                 }

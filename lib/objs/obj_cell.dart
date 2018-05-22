@@ -2,6 +2,7 @@ import 'obj.dart';
 
 enum ObjCellType {
   Default,
+  Label,
   TextField,
   Button,
 }

@@ -101,8 +101,8 @@ class LoginManager {
 */
   }
 
-  static Future<GoogleSignInAccount> signOutWithGoogle() async {
-    return await _googleSignIn.signOut();
+  static Future<bool> signOut() async {
+    return await _auth.signOut();
   }
 
 }

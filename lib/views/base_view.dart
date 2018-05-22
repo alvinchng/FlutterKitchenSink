@@ -6,10 +6,12 @@ class BaseView extends StatelessWidget {
     Key key,
     this.title,
     this.child,
+    this.scaffoldKey
   }) : super (key: key);
 
   final Widget child;
   final title;
+  final Key scaffoldKey;
   
   @override
   Widget build(BuildContext context) {
@@ -19,7 +21,13 @@ class BaseView extends StatelessWidget {
       appBarTitle = "";
     }
 
+    var appScaffoldKey = this.scaffoldKey;
+    if (appScaffoldKey == null) {
+      appScaffoldKey = new GlobalKey<ScaffoldState>();
+    }
+
     return new Scaffold(
+      key: appScaffoldKey,
       appBar: new AppBar(
         title: new Text(appBarTitle),
         backgroundColor: Colors.pink,

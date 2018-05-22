@@ -1,12 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'detail_view.dart';
-import 'login_view.dart';
+import 'task_view.dart';
 import 'package:kitchensink/utilities/data_manager.dart' as DM;
 import 'package:kitchensink/objs/obj_parser.dart';
 import 'package:kitchensink/utilities/login_manager.dart';
+
 
 class RootView extends StatefulWidget {
   @override
@@ -35,15 +34,10 @@ class RootViewState extends State<RootView> {
       ),
       body: new Center(
         child: new FlatButton(
-          child: new Text("Details"),
+          child: new Text("Sign Out"),
           onPressed: () async {
-            
-            if (await LoginManager.isSignIn()) {
-              print("LOGINNING.....");
-            }
-            else {
-              print('NOT LOGIN..');
-            }
+            await LoginManager.signOut();
+            Navigator.pushNamedAndRemoveUntil(context, '/login', (Route<dynamic> r) => false);
           },
         )
       )
@@ -53,27 +47,13 @@ class RootViewState extends State<RootView> {
 
   // Methods
   _actionTapped(BuildContext context) {
-    const MethodChannel nativeCall = const MethodChannel('kitchensink.flutter.io/nativecall');
-
-    Future<Null> _sayHello() async {
-      String info;
-      try {
-        info = await nativeCall.invokeMethod("sayHello");
-      } catch (e) {
-        info = "Fall to call sayHello";
-      }
-
-      var alert = AlertDialog(title: new Text(info),);
-      showDialog(context: context, builder: (_) => alert);
-    }
-
-    //_sayHello();
+    
     
     _naviPush(BuildContext context) async {
       final result = await Navigator.of(context).push(new PageRouteBuilder(
         opaque: true,
         pageBuilder: (BuildContext context, _, __) {
-         return new LoginView(); 
+         return new TaskView(); 
         },
         transitionDuration: const Duration(milliseconds: 500),
         transitionsBuilder: (_, Animation<double> animation, __, Widget child) {
@@ -109,21 +89,3 @@ class RootViewState extends State<RootView> {
 } 
 
 
-class MyCustomRoute<T> extends MaterialPageRoute<T> {
-  MyCustomRoute({ WidgetBuilder builder, RouteSettings settings })
-      : super(builder: builder, settings: settings);
-
-  @override
-  Widget buildTransitions(BuildContext context,
-      Animation<double> animation,
-      Animation<double> secondaryAnimation,
-      Widget child) {
-    //if (settings.isInitialRoute)
-    //  return child;
-    // Fades between routes. (If you don't want any animation, 
-    // just return child.)
-    return new FadeTransition(opacity: animation, child: child);
-
-    
-  }
-}
