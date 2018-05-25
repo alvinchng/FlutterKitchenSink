@@ -13,6 +13,7 @@ class ObjCell extends Obj {
   ObjCellType type = ObjCellType.Default;
 
   bool isTextProtected = false;
+  bool isClickable = false;
 
   var relativeObj;
 

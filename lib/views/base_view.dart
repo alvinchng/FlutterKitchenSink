@@ -6,10 +6,12 @@ class BaseView extends StatelessWidget {
     Key key,
     this.title,
     this.child,
-    this.scaffoldKey
+    this.scaffoldKey,
+    this.actions : const <Widget>[]
   }) : super (key: key);
 
   final Widget child;
+  final List<Widget> actions;
   final title;
   final Key scaffoldKey;
   
@@ -31,6 +33,7 @@ class BaseView extends StatelessWidget {
       appBar: new AppBar(
         title: new Text(appBarTitle),
         backgroundColor: Colors.pink,
+        actions: actions,
       ),
       body: child,
     );

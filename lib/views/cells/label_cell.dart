@@ -6,7 +6,7 @@ import 'package:kitchensink/objs/obj_cell.dart';
 class LabelCell extends StatefulWidget {
 
   final ObjCell obj;
-  final VoidCallback onPress;
+  final Function onPress;
 
   const LabelCell({
     Key key,
@@ -43,14 +43,7 @@ class LabelCellState extends State<LabelCell> {
     String title = (widget.obj.title !=null) ? widget.obj.title : '';
     String desc = (widget.obj.desc !=null) ? widget.obj.desc : '';
 
-    // TODO: implement build
-      return new FlatButton(
-        onPressed: () {
-          if (widget.onPress != null) {
-            widget.onPress();
-          }
-        },
-        child: new Container(
+    Container content = new Container(
           padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
           child: Row(
             children: <Widget>[
@@ -75,9 +68,27 @@ class LabelCellState extends State<LabelCell> {
               Icon(Icons.keyboard_arrow_right),
             ],
           ),
-        ),
-        
-      );
+        );
+
+
+      if (widget.obj.isClickable) {
+        return new FlatButton(
+          onPressed: () {
+            if (widget.onPress != null) {
+              widget.onPress();
+            }
+          },
+          child: content,
+          
+        );
+      }
+      else {
+        return new Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: content,
+        );
+      }
+
       
   }
 

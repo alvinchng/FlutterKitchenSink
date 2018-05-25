@@ -5,6 +5,7 @@ import 'package:kitchensink/objs/obj_cell.dart';
 import 'package:kitchensink/views/cells/textfield_cell.dart';
 import 'package:kitchensink/views/cells/button_cell.dart';
 import 'package:kitchensink/views/cells/label_cell.dart';
+import 'package:kitchensink/utilities/connection_manager.dart' as CONN;
 
 class TaskView extends StatefulWidget {
   @override
@@ -62,6 +63,7 @@ class TaskViewState extends State<TaskView> {
     cell = new ObjCell();
     cell.type = ObjCellType.Label;
     cell.identifier = 'date';
+    cell.isClickable = true;
     cell.title = "Date";
     cell.desc = new DateTime.now().toString();
     _dataSources.add(cell);
@@ -70,6 +72,8 @@ class TaskViewState extends State<TaskView> {
   }
 
   _actionSave() {
+
+    CONN.ConnectionManager().updateData();
 
   }
 
@@ -88,6 +92,14 @@ class TaskViewState extends State<TaskView> {
     return new BaseView(
       scaffoldKey: _scaffoldKey,
       title: 'New Task',
+      actions: <Widget>[
+        new IconButton(
+          icon: Icon(Icons.send),
+          onPressed: () {
+            _actionSave();
+          },
+        )
+      ],
       child: new SafeArea(
                 top: false,
                 bottom: false,
