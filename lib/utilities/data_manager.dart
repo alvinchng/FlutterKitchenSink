@@ -1,4 +1,6 @@
 
+part of utilities;
+
 
 class DataManager {
 
@@ -11,6 +13,10 @@ class DataManager {
   DataManager._internal();
 
   // Methods
-  
+  ObjUser user;
+
+  static clear() {
+    DataManager().user = null;
+  }
 
 }

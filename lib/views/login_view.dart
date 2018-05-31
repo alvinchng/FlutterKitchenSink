@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'base_view.dart';
 import 'package:kitchensink/objs/obj_cell.dart';
-import 'package:kitchensink/views/cells/textfield_cell.dart';
-import 'package:kitchensink/views/cells/button_cell.dart';
+import 'package:kitchensink/views/cells/cells.dart';
 import 'package:kitchensink/utilities/login_manager.dart';
-import 'package:kitchensink/utilities/helper.dart';
+import 'package:kitchensink/utilities/utilities.dart';
 
 class LoginView extends StatefulWidget {
   @override

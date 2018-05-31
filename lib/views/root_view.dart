@@ -1,13 +1,16 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'task_view.dart';
-import 'package:kitchensink/utilities/data_manager.dart' as DM;
 import 'package:kitchensink/objs/obj_parser.dart';
 import 'package:kitchensink/utilities/login_manager.dart';
 import 'package:kitchensink/objs/obj_cell.dart';
-import 'package:kitchensink/views/cells/label_cell.dart';
-import 'package:kitchensink/utilities/helper.dart';
+import 'package:kitchensink/views/cells/cells.dart';
+import 'package:kitchensink/utilities/utilities.dart';
+import 'package:kitchensink/models/task_model.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class RootView extends StatefulWidget {
   @override
@@ -22,52 +25,108 @@ class RootViewState extends State<RootView> {
 
   List<ObjCell> _dataSources;
   ScrollController _scrollController = new ScrollController();
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = new GlobalKey<RefreshIndicatorState>();
+  
+
   bool _isLoading = false;
 
+  //File _image;
+
+  Future getImage() async {
+    
+    File image = await ImagePicker.pickImage(source: ImageSource.gallery, maxWidth: 1080.0).catchError((e) => print(e));
+    int length = await image.length();
+
+    if (length > 0) {
+      String uuidFilename = Uuid().generateV4()+'.jpg';
+      final StorageReference ref = FirebaseStorage.instance.ref().child('test').child(uuidFilename);
+      final StorageFileUploadTask uploadTask = ref.putFile(image);
+      final Uri downloadURL = (await uploadTask.future).downloadUrl;
+      
+
+      print(downloadURL.toString());
+    }
+    
+    
+    
+    
+  }
+
   bool _onNotification(ScrollNotification notification) {
+    
 
     if (notification is ScrollUpdateNotification) {
-      // print('onNotification');
-      // print('max:${_scrollController.mostRecentlyUpdatedPosition.maxScrollExtent}  offset:${_scrollController.offset}');
-      // 当滑动到底部的时候，maxScrollExtent和offset会相等
-      // when scroll to the bottom, maxScrollExtent will equal to offset
-      // if (_scrollController.mostRecentlyUpdatedPosition.maxScrollExtent >
-      //         _scrollController.offset &&
-      //     _scrollController.mostRecentlyUpdatedPosition.maxScrollExtent -
-      //             _scrollController.offset <=
-      //         50) {
-                
-      //   // 要加载更多
-      //   if (this.isMore && this.loadMoreStatus != LoadMoreStatus.loading) {
-      //     // 有下一页 if have more data and not loading
-      //     print('load more');
-      //     this.loadMoreStatus = LoadMoreStatus.loading;
-      //     _loadMoreData();
-      //     setState(() {});
-      //   } else {}
-      // }
 
-      //print('max: ${_scrollController.position.maxScrollExtent} offset:${_scrollController.offset}');
       
-      // scroll down detection.
-      if (_scrollController.offset > _scrollController.position.maxScrollExtent &&
-          _scrollController.position.maxScrollExtent - _scrollController.offset <= -100) {
-        //print(_scrollController.position.maxScrollExtent - _scrollController.offset);
-        if (!_isLoading) {
-          print("loading ....");
-          _isLoading = true;
-          Helper.progressHUD(context);
+      if (_scrollController.position.extentAfter <= 0) {
+        
+          if (_dataSources.length > 0 && !_isLoading) {
+            
+            _isLoading = true;
+            _scaffoldKey.currentState.showSnackBar(new SnackBar(
+              duration: Duration(seconds: 3),
+              content: Row(
+                children: <Widget>[
+                  CircularProgressIndicator(),
+                  new Container(
+                    padding: const EdgeInsets.fromLTRB(12.0, 0.0, 0.0, 0.0),
+                    child: new Text("Loading..."),
+                  )
+                ],
+              ),
+            ));
 
-          new Future.delayed(new Duration(seconds: 5), () {
-            _isLoading = false;
-            print("stop ....");
-            Navigator.pop(context);
-            //_login();
-          });
-          
-        }
+            ObjCell lastCell = _dataSources[_dataSources.length-1];
+            TaskModel.fetchAppendData(lastCell, (result){
+              
+              setState(() {
+                if (result is List) {
+                  result.forEach((item){
+                    if (item is ObjCell) {
+                      
+                      _dataSources.add(item);
+                    }
+                  });
+                  
+                }
+              });
+
+              new Future.delayed(new Duration(seconds: 5), () {
+                _isLoading = false;
+              });
+
+              
+            }, (){
+              new Future.delayed(new Duration(seconds: 5), () {
+                _isLoading = false;
+              });
+            });
+
+          }
+
 
       }
+      
+      // IOS ONLY ----
+      // if (_scrollController.offset > _scrollController.position.maxScrollExtent &&
+      //     _scrollController.position.maxScrollExtent - _scrollController.offset <= -60) {
+        
+      //   if (!_isLoading) {
+      //     print("loading ....");
+      //     _isLoading = true;
+      //     Helper.progressHUD(context);
+
+      //     new Future.delayed(new Duration(seconds: 5), () {
+      //       _isLoading = false;
+      //       print("stop ....");
+      //       Navigator.pop(context);
+      //       //_login();
+      //     });
+          
+      //   }
+
+      // }
 
       
 
@@ -77,12 +136,15 @@ class RootViewState extends State<RootView> {
 
   }
 
+  
+
   @override
   void initState() {
       // TODO: implement initState
       super.initState();
-      addDataSources();
-      
+
+      _dataSources = new List();
+      loadDataSources();
 
   }
 
@@ -94,31 +156,35 @@ class RootViewState extends State<RootView> {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
-    return new Scaffold(
-      appBar: new AppBar(
-        title: new Text("Home"),
-        backgroundColor: Colors.pink,
-        actions: <Widget>[
-          new IconButton(
-            icon: Icon(Icons.exit_to_app),
-            onPressed: () async {
-              await LoginManager.signOut();
-            Navigator.pushNamedAndRemoveUntil(context, '/login', (Route<dynamic> r) => false);
-            },
-          )
-        ],
+    
+    List<Widget> views = new List();
+
+    if (_isLoading) {
+      views.addAll(<Widget>[
+        CircularProgressIndicator()
+      ]);
+    }
+    else {
+      views.addAll(<Widget>[
+        Text("No Record."),
+        RaisedButton(child: Text("Refresh."), onPressed: () {
+          loadDataSources();
+        },)
+      ]);
+    }
+
+
+    Widget emptyView = new Center(
+      child: new Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: views
       ),
-      floatingActionButton: new SafeArea(
-        child: new FloatingActionButton(
-          child: new Icon(Icons.add),
-          onPressed: () {
-          _actionTapped(context);
-        },),
-      ),
-      body: new NotificationListener(
+    );
+
+    Widget listView = new NotificationListener(
         onNotification: _onNotification,
         child: new RefreshIndicator(
+          key: _refreshIndicatorKey,
           onRefresh: _onRefresh,
           child: new ListView.builder(
                 controller: _scrollController,
@@ -142,7 +208,64 @@ class RootViewState extends State<RootView> {
 
               ), 
           ),
-      )
+      );
+
+    
+    // TODO: implement build
+    return new Scaffold(
+      key: _scaffoldKey,
+      appBar: new AppBar(
+        title: new Text("Home"),
+        backgroundColor: Colors.pink,
+        actions: <Widget>[
+          new IconButton(
+            icon: Icon(Icons.exit_to_app),
+            onPressed: () async {
+              await LoginManager.signOut();
+            Navigator.pushNamedAndRemoveUntil(context, '/login', (Route<dynamic> r) => false);
+            },
+          )
+        ],
+      ),
+      drawer: new Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            new UserAccountsDrawerHeader(
+              accountName: Text(DataManager().user.displayName),
+              accountEmail: Text(DataManager().user.email),
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  fit: BoxFit.fill,
+                  image: NetworkImage('https://firebasestorage.googleapis.com/v0/b/kitchensink-646c1.appspot.com/o/test%2Ffbec50ed-5618-4127-9343-a183d9b3722f.jpg?alt=media&token=7a23014c-97ee-4803-8362-b9600fa1fb80')
+                ),
+              ),
+            ),   
+            new ListTile(
+              title: Text('First Page'),
+              trailing: Icon(Icons.arrow_upward),
+            ),
+            new ListTile(
+              title: Text('Second Page'),
+              trailing: Icon(Icons.arrow_forward),
+            ),
+            new Divider(),
+            new ListTile(
+              title: Text('Close'),
+              trailing: Icon(Icons.cancel),
+            ),
+          ],
+        ),
+      ),
+      floatingActionButton: new SafeArea(
+        child: new FloatingActionButton(
+          child: new Icon(Icons.add),
+          onPressed: () {
+          _actionTapped(context);
+          //getImage();
+        },),
+      ),
+      body: (_dataSources.length > 0) ? listView : emptyView
     );
 
   }
@@ -187,27 +310,53 @@ class RootViewState extends State<RootView> {
   }
 
   Future<Null> _onRefresh() {
+    
     Completer<Null> completer = new Completer<Null>();
-    Timer timer = new Timer(Duration(seconds: 3), () => completer.complete());
+    //Timer timer = new Timer(Duration(seconds: 3), () => completer.complete());
+    loadDataSources(completer);
+
     return completer.future;
   }
 
-  addDataSources() {
+  loadDataSources([Completer completer]) {
+    
+    
+    setState(() {
+      _isLoading = true;
+    });
+    
+    
+    TaskModel.fetchData((result){
+      
+      if (completer != null) {
+        completer.complete();
+      }
 
-    ObjCell cell;
-    _dataSources = new List();
+      setState(() {
+        _isLoading = false;
+        if (result is List) {
+          _dataSources = result;
+        }
+      });
+    }, (){
+      
+      if (completer != null) {
+        completer.complete();
+      }
 
-    cell = new ObjCell();
-    cell.type = ObjCellType.Label;
-    cell.title = "Test 1";
-    cell.desc = "hahahah";
-    _dataSources.add(cell);
+      setState(() {
+        _isLoading = false;
+            });
+    });
 
-    cell = new ObjCell();
-    cell.type = ObjCellType.Label;
-    cell.title = "Test 1";
-    cell.desc = "hahahah";
-    _dataSources.add(cell);
+    // new Future.delayed(new Duration(seconds: 3), () {
+      
+    //   setState(() {
+    //     _isLoading = false;
+    //         });
+    // });
+
+    
 
 
   }

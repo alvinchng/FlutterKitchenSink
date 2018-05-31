@@ -1,7 +1,5 @@
-import 'package:meta/meta.dart';
-import 'package:flutter/material.dart';
-import 'package:kitchensink/objs/obj_cell.dart';
 
+part of cells;
 
 class LabelCell extends StatefulWidget {
 
@@ -45,29 +43,35 @@ class LabelCellState extends State<LabelCell> {
 
     Container content = new Container(
           padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
-          child: Row(
+          child: new Column(
             children: <Widget>[
-              Expanded(
-                child: new Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    new Container(
-                      padding: const EdgeInsets.only(bottom: 8.0),
-                      child: new Text(title.toString(), 
-                                      style: TextStyle(
-                                        fontSize: 18.0,
+              Row(
+                children: <Widget>[
+                  Expanded(
+                    child: new Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        new Container(
+                          padding: const EdgeInsets.only(bottom: 8.0),
+                          child: new Text(title.toString(), 
+                                          style: TextStyle(
+                                            fontSize: 18.0,
+                                            ),
                                         ),
-                                    ),
-                    ),
-                    new Text(desc.toString(), style: TextStyle(
-                      color: Colors.grey[500]
-                    ),)
-                  ],
-                )
+                        ),
+                        new Text(desc.toString(), style: TextStyle(
+                          color: Colors.grey[500]
+                        ),)
+                      ],
+                    )
+                  ),
+                  Icon(Icons.keyboard_arrow_right),
+                ],
               ),
-              Icon(Icons.keyboard_arrow_right),
+              Container(height: 8.0,),
+              Divider(),
             ],
-          ),
+          )
         );
 
 

@@ -1,5 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:kitchensink/utilities/utilities.dart';
+import 'package:kitchensink/objs/obj_user.dart';
 
 import 'dart:async';
 
@@ -12,6 +14,12 @@ class LoginManager {
 
   LoginManager(FirebaseUser user) {
     this.firebaseUser = user;
+    if (DataManager().user == null) {
+      DataManager().user = new ObjUser();
+    }
+    DataManager().user.email = user.email;
+    DataManager().user.displayName = user.displayName;
+
   }
 
   // Methods
@@ -20,6 +28,9 @@ class LoginManager {
     FirebaseUser currentUser = await _auth.currentUser();
     if (currentUser == null) {
       return false;
+    }
+    else {
+      LoginManager(currentUser);
     }
 
     return true;

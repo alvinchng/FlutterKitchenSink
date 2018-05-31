@@ -18,6 +18,7 @@ class Application extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: Theme.of(context).copyWith(
         primaryColor: Colors.pink,
+        canvasColor: Colors.grey[150], //drawer background.
       ),
       home: new FutureBuilder(
         future: LoginManager.isSignIn(),
@@ -32,6 +33,7 @@ class Application extends StatelessWidget {
           } else {
             return new Center(
               child: new Container(
+                alignment: Alignment.center,
                 color: Colors.white,
                 child: new CircularProgressIndicator(),
               ),

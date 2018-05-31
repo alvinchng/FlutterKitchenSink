@@ -3,6 +3,7 @@ import 'obj.dart';
 enum ObjCellType {
   Default,
   Label,
+  LabelImage,
   TextField,
   Button,
 }
@@ -31,5 +32,7 @@ class ObjCell extends Obj {
 
     return cell;
   }
+
+  
 
 }

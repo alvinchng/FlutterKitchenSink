@@ -1,11 +1,13 @@
 import 'dart:async';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'base_view.dart';
 import 'package:kitchensink/objs/obj_cell.dart';
-import 'package:kitchensink/views/cells/textfield_cell.dart';
-import 'package:kitchensink/views/cells/button_cell.dart';
-import 'package:kitchensink/views/cells/label_cell.dart';
-import 'package:kitchensink/utilities/connection_manager.dart' as CONN;
+import 'package:kitchensink/views/cells/cells.dart';
+import 'package:kitchensink/models/task_model.dart';
+import 'package:kitchensink/utilities/utilities.dart';
+import 'package:image_picker/image_picker.dart';
 
 class TaskView extends StatefulWidget {
   @override
@@ -42,6 +44,59 @@ class TaskViewState extends State<TaskView> {
 
   }
 
+  _showImageDialog(BuildContext context) async {
+
+    var showImagePicker = (int type) async {
+
+      File image;
+      if (type == 0) {
+        image = await ImagePicker.pickImage(source: ImageSource.camera, maxWidth: 1080.0).catchError((e) => print(e));
+      }
+      else {
+        image = await ImagePicker.pickImage(source: ImageSource.gallery, maxWidth: 1080.0).catchError((e) => print(e));
+      }
+      
+      int length = await image.length();
+
+      if (length > 0) {
+        ObjCell photoCell = ObjCell.findByIdentifier(_dataSources, 'photo');
+        photoCell.relativeObj;
+        print('PHOTO SELECTED....');
+      }
+    };
+    
+    showModalBottomSheet(
+        context: context,
+        builder: (context) {
+          return new Container(
+            height: 150.0,
+            child: ListView(
+              children: <Widget>[
+                ListTile(
+                  title: Text('Camera'),
+                  leading: Icon(Icons.camera_alt),
+                  onTap: (){
+                    Navigator.of(context).pop();
+                    showImagePicker(0);
+                  },
+                ),
+                ListTile(
+                  title: Text('Gallery'),
+                  leading: Icon(Icons.photo),
+                  onTap: (){
+                    Navigator.of(context).pop();
+                    showImagePicker(1);
+                  },
+                ),
+              ]
+            ),
+          );
+        });
+
+
+
+  }
+
 
   addDataSources() {
 
@@ -68,12 +123,37 @@ class TaskViewState extends State<TaskView> {
     cell.desc = new DateTime.now().toString();
     _dataSources.add(cell);
 
+    cell = new ObjCell();
+    cell.type = ObjCellType.LabelImage;
+    cell.identifier = 'photo';
+    cell.isClickable = true;
+    cell.title = "Add a photo.";
+    _dataSources.add(cell);
+
 
   }
 
   _actionSave() {
 
-    CONN.ConnectionManager().updateData();
+    // serialization....
+    Map<String,dynamic> data = new Map();
+    _dataSources.forEach((cell){
+      data[cell.identifier] = (cell.desc !=null) ? cell.desc : '';
+    });
+    
+    //print(data);
+
+    Helper.progressHUD(context);
+    TaskModel.addData(data, 
+                    () async {
+                      Navigator.pushNamedAndRemoveUntil(context, '/home', (Route<dynamic> r) => false);
+                    },
+                    () async {
+                      Navigator.pop(context);
+                      _scaffoldKey.currentState.showSnackBar(new SnackBar(
+                        content: new Text('Failure.'),
+                      ));
+                    });
 
   }
 
@@ -114,8 +194,23 @@ class TaskViewState extends State<TaskView> {
                           return new LabelCell(
                             obj: item,
                             onPress: () async {
-                             print(item.title); 
-                             _showDateDialog(context);
+                             //print(item.title); 
+                             if (item.identifier == 'date') {
+                               _showDateDialog(context);
+                             }
+                            },
+                          );
+
+                        }
+                        else if (item.type == ObjCellType.LabelImage) {
+                          
+                          return new LabelImageCell(
+                            obj: item,
+                            onPress: () async {
+                             //print(item.title); 
+                             if (item.identifier == 'photo') {
+                               _showImageDialog(context);
+                             }
                             },
                           );
 

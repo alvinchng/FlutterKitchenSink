@@ -1,7 +1,5 @@
-import 'package:meta/meta.dart';
-import 'package:flutter/material.dart';
-import 'package:kitchensink/utilities/focusnode_manager.dart';
-import 'package:kitchensink/objs/obj_cell.dart';
+
+part of cells;
 
 
 class TextFieldCell extends StatefulWidget {
